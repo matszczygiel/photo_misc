@@ -14,4 +14,9 @@ int main() {
     GTOPW c(exp, coefs, Shell::P, {0.65, 0., 0.34});
 
     cout << c;
+
+    GTOPW r;
+    read(cin, r);
+
+    cout << r;
 }

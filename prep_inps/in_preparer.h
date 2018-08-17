@@ -4,10 +4,11 @@
 #include <array>
 #include <cassert>
 #include <complex>
-#include <iomanip>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
+#include <iostream>
 
 typedef std::array<double, 3> Vec3d;
 typedef std::complex<double> cdouble;
@@ -26,7 +27,7 @@ class Shell {
                   H = 5,
                   J = 6 };
 
-    friend Shell string2shell(const std::string &str);
+    friend Shell char2shell(const char &c);
     friend char shell2char(const Shell &shell);
 
     Shell(const Shell &shell) = default;
@@ -41,7 +42,7 @@ class Shell {
 class GTOPW {
    public:
     GTOPW(const std::vector<double> &exponents,
-          const std::vector<cdouble> coefficients,
+          const std::vector<cdouble> &coefficients,
           const Shell &shell,
           const Vec3d kvec)
         : shl(shell) {
@@ -53,7 +54,12 @@ class GTOPW {
         k     = kvec;
     };
 
+    GTOPW() : size(0), shl(0), exps(), coefs() {
+        k = {0, 0, 0};
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const GTOPW &rhs);
+    friend bool read(std::istream &is, GTOPW &out_gtopw);
 
    private:
     std::vector<double> exps;
