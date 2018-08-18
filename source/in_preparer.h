@@ -13,8 +13,9 @@
 typedef std::array<double, 3> Vec3d;
 typedef std::complex<double> cdouble;
 
-class Shell {
-   public:
+class Shell
+{
+public:
     static constexpr int crt_siz[11] = {1, 3, 6, 10, 15, 21, 28, 36, 45, 55};
 
     static const std::map<int, char> strmap;
@@ -25,22 +26,28 @@ class Shell {
                   F = 3,
                   G = 4,
                   H = 5,
-                  J = 6 };
+                  J = 6
+                };
 
     friend Shell char2shell(const char &c);
     friend char shell2char(const Shell &shell);
 
     Shell(const Shell &shell) = default;
-    Shell(const int &shell) { shl = static_cast<Shells>(shell); }
+    Shell(const int &shell) {
+        shl = static_cast<Shells>(shell);
+    }
 
-    int shell_size() const { return crt_siz[shl]; }
+    int shell_size() const {
+        return crt_siz[shl];
+    }
 
-   private:
+private:
     Shells shl;
 };
 
-class GTOPW {
-   public:
+class GTOPW
+{
+public:
     GTOPW(const std::vector<double> &exponents,
           const std::vector<cdouble> &coefficients,
           const Shell &shell,
@@ -61,7 +68,7 @@ class GTOPW {
     friend std::ostream &operator<<(std::ostream &os, const GTOPW &rhs);
     friend bool read(std::istream &is, GTOPW &out_gtopw);
 
-   private:
+private:
     std::vector<double> exps;
     std::vector<cdouble> coefs;
     Shell shl;
