@@ -2,27 +2,28 @@
 
 using namespace std;
 
-const map<int, char> Shell::strmap = {{0, 'S'},
-                                      {1, 'P'},
-                                      {2, 'D'},
-                                      {3, 'F'},
-                                      {4, 'G'},
-                                      {5, 'H'},
-                                      {6, 'J'}};
+const std::map<char, int> Shell::charmap = {{'S', 0},
+                                            {'P', 1},
+                                            {'D', 2},
+                                            {'F', 3},
+                                            {'G', 4},
+                                            {'H', 5},
+                                            {'J', 6}};
+
+const std::array<int, 11> Shell::crt_siz = {1, 3, 6, 10, 15, 21, 28, 36, 45, 55};
+const std::array<int, 11> Shell::labels  = {'S', 'P', 'D', 'F', 'G', 'H', 'I'};
 
 Shell char2shell(const char &c) {
-    int shlind = Shell::strmap.at(c);
+    int shlind = Shell::charmap.at(c);
     return Shell(shlind);
 }
 
 char shell2char(const Shell &shell) {
-    char c = Shell::strmap.at(shell.shl);
-    return c;
+    return Shell::labels.at(static_cast<int>(shell.shl));
 }
 
 ostream &operator<<(ostream &os, const GTOPW &rhs) {
     os << shell2char(rhs.shl);
-    os.right;
     os.width(3);
     os << rhs.size;
     os << "\n";
@@ -52,6 +53,7 @@ ostream &operator<<(ostream &os, const GTOPW &rhs) {
         os << rhs.k[2];
         os << "\n";
     }
+    return os;
 }
 
 bool read(std::istream &is, GTOPW &out_gtopw) {
@@ -61,8 +63,7 @@ bool read(std::istream &is, GTOPW &out_gtopw) {
 
     stringstream ss;
     ss << line;
-    char moment   = ss.get();
-    cerr << moment << endl;
+    char moment = ss.get();
     out_gtopw.shl = char2shell(moment);
     ss >> out_gtopw.size;
     out_gtopw.exps.empty();
@@ -91,4 +92,6 @@ bool read(std::istream &is, GTOPW &out_gtopw) {
         else if (k0 != out_gtopw.k[0] || k1 != out_gtopw.k[1] || k2 != out_gtopw.k[2])
             throw runtime_error("Invalind gtopw contraction read - check k.");
     }
+
+    return true;
 }
