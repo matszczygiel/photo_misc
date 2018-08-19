@@ -30,6 +30,7 @@ class Shell {
 
     friend Shell char2shell(const char &c);
     friend char shell2char(const Shell &shell);
+    friend int shell2int(const Shell &shell);
 
     Shell(const Shell &shell) = default;
     Shell(const int &shell) {
@@ -60,7 +61,8 @@ class GTOPW {
     }
 
     friend std::ostream &operator<<(std::ostream &os, const GTOPW &rhs);
-    friend bool read(std::istream &is, GTOPW &out_gtopw);
+    bool read(std::istream &is);
+    int functions_number();
 
    private:
     std::vector<double> exps;
@@ -69,8 +71,19 @@ class GTOPW {
     Vec3d k;
     int size;
 };
-/*
+
 class Basis {
+   public:
+    Basis() : gtopws(), atom() {
+        position = {0, 0, 0};
+    }
+
+    bool read(std::istream &is);
+
+   private:
+    std::vector<GTOPW> gtopws;
+    std::string atom;
+    Vec3d position;
 }
 
 class Molecule {
@@ -85,5 +98,5 @@ class Inputs_preparer {
     double rmax;
     int N;
 };
-*/
+* /
 #endif

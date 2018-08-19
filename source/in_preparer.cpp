@@ -22,14 +22,18 @@ char shell2char(const Shell &shell) {
     return Shell::labels.at(static_cast<int>(shell.shl));
 }
 
+int shell2int(const Shell &shell) {
+    return static_cast<int>(shell.shl);
+}
+
 ostream &operator<<(ostream &os, const GTOPW &rhs) {
     os << shell2char(rhs.shl);
     os.width(3);
     os << rhs.size;
     os << "\n";
+    string spaces = "          ";
 
     for (int i = 0; i < rhs.size; ++i) {
-        string spaces = "          ";
         os.width(3);
         os << i + 1;
         os << scientific;
@@ -56,42 +60,66 @@ ostream &operator<<(ostream &os, const GTOPW &rhs) {
     return os;
 }
 
-bool read(std::istream &is, GTOPW &out_gtopw) {
+bool GTOPW::read(std::istream &is) {
     string line;
     if (!getline(is, line))
         return false;
 
-    stringstream ss;
-    ss << line;
+    istringstream ss(line);
     char moment = ss.get();
-    out_gtopw.shl = char2shell(moment);
-    ss >> out_gtopw.size;
-    out_gtopw.exps.empty();
-    out_gtopw.coefs.empty();
-    out_gtopw.exps.reserve(out_gtopw.size);
-    out_gtopw.coefs.reserve(out_gtopw.size);
+    shl         = char2shell(moment);
+    ss >> size;
+    exps.empty();
+    coefs.empty();
+    exps.reserve(size);
+    coefs.reserve(size);
 
-    for (int i = 0; i < out_gtopw.size; ++i) {
-        ss.clear();
+    for (int i = 0; i < size; ++i) {
         getline(is, line);
-        ss << line;
+        istringstream ssl(line);
         double exp, re, im;
         int gnum;
-        ss >> gnum;
+        ssl >> gnum;
         if (gnum != i + 1)
             throw runtime_error("Invalind gtopw contraction read.");
 
-        ss >> exp >> re >> im;
-        out_gtopw.exps.push_back(exp);
-        out_gtopw.coefs.push_back(cdouble(re, im));
+        ssl >> exp >> re >> im;
+        exps.push_back(exp);
+        coefs.push_back(cdouble(re, im));
 
         double k0, k1, k2;
-        ss >> k0 >> k1 >> k2;
+        ssl >> k0 >> k1 >> k2;
         if (i == 0)
-            out_gtopw.k = {k0, k1, k2};
-        else if (k0 != out_gtopw.k[0] || k1 != out_gtopw.k[1] || k2 != out_gtopw.k[2])
+            k = {k0, k1, k2};
+        else if (k0 != k[0] || k1 != k[1] || k2 != k[2])
             throw runtime_error("Invalind gtopw contraction read - check k.");
     }
 
+    return true;
+}
+
+int GTOPW::functions_number() {
+    return Shell::crt_siz.at(shell2int(shl)) * size;
+}
+
+bool Basis::read(istream &is) {
+    Basis();
+    
+    string line;
+    if (!getline(is, line))
+        return false;
+
+    istringstream ss(line);
+    string token;
+    ss >> token;
+    if (token == "$END")
+        return false;
+
+    atom = token;
+    ss >> position[0] >> position[1] >> position[2];
+    GTOPW g;
+    while(g.read()) 
+        gtopws.push_back(g);
+    
     return true;
 }

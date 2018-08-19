@@ -5,8 +5,8 @@
 using namespace std;
 
 int main() {
-    std::vector<double> exp                 = {3.45544, 56.4554, 2234.45};
-    std::vector<std::complex<double>> coefs = {
+    vector<double> exp                 = {3.45544, 56.4554, 2234.45};
+    vector<std::complex<double>> coefs = {
         cdouble(2.343, 23.4324),
         cdouble(0.32424, -435.345),
         cdouble(-0.00234, 0.0234023)};
@@ -16,7 +16,8 @@ int main() {
     cout << c;
 
     GTOPW r;
-    read(cin, r);
+    r.read(cin);
 
     cout << r;
+    cout << r.functions_number();
 }
