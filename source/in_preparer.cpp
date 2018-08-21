@@ -2,124 +2,78 @@
 
 using namespace std;
 
-const std::map<char, int> Shell::charmap = {{'S', 0},
-                                            {'P', 1},
-                                            {'D', 2},
-                                            {'F', 3},
-                                            {'G', 4},
-                                            {'H', 5},
-                                            {'J', 6}};
+Inputs_preparer::Inputs_preparer(const double &r_min = 0.8, const double &r_max = 4.0, const int &n_points = 15,
+                                 const int &n_kvals = 10)
+    : basis(), cont(), kval(0) {
+    double step = (r_max - r_min) / (n_points - 1);
+    for (int i = 0; i < n_points; ++i)
+        rvals.push_back(r_min + i * step);
 
-const std::array<int, 11> Shell::crt_siz = {1, 3, 6, 10, 15, 21, 28, 36, 45, 55};
-const std::array<int, 11> Shell::labels  = {'S', 'P', 'D', 'F', 'G', 'H', 'I'};
+    double theta_step = (M_PI / 2) / (n_kvals - 1);
+     for (int i = 0; i < n_kvals; ++i)
+        ktheta.push_back(i * theta_step);   
 
-Shell char2shell(const char &c) {
-    int shlind = Shell::charmap.at(c);
-    return Shell(shlind);
+    path_tmp   = "/home/mateusz/workspace/photo_misc/tmp_data/";
+    path_cfits = "/home/mateusz/Documents/cpp/combined_fit/output2/";
 }
 
-char shell2char(const Shell &shell) {
-    return Shell::labels.at(static_cast<int>(shell.shl));
+void Inputs_preparer::read_basis(const string &path) {
+    ifstream file(path);
+    if (!file.is_open())
+        throw runtime_error("Invalid input basis file.");
+
+    basis.read(file);
+    file.close();
 }
 
-int shell2int(const Shell &shell) {
-    return static_cast<int>(shell.shl);
+void Inputs_preparer::read_continuum(const string &path) {
+    ifstream file(path);
+    if (!file.is_open())
+        throw runtime_error("Invalid continuum file.");
+
+    cont.read(file);
+    file.close();
 }
 
-ostream &operator<<(ostream &os, const GTOPW &rhs) {
-    os << shell2char(rhs.shl);
-    os.width(3);
-    os << rhs.size;
-    os << "\n";
-    string spaces = "          ";
+void Inputs_preparer::punch_gamess_setings(ofstream &ofs) const {
+    if (!ofs.is_open())
+        throw runtime_error("Gamess input file is not open.");
 
-    for (int i = 0; i < rhs.size; ++i) {
-        os.width(3);
-        os << i + 1;
-        os << scientific;
-        os.precision(9);
-        os << spaces;
-        os.width(18);
-        os << rhs.exps[i];
-        os << spaces;
-        os.width(18);
-        os << rhs.coefs[i].real();
-        os.width(18);
-        os << rhs.coefs[i].imag();
-        os << spaces;
-        os << fixed;
-        os.precision(5);
-        os.width(10);
-        os << rhs.k[0];
-        os.width(10);
-        os << rhs.k[1];
-        os.width(10);
-        os << rhs.k[2];
-        os << "\n";
-    }
-    return os;
+    ofs << " $CONTRL";
+    ofs << " SCFTYP=RHF RUNTYP=ENERGY ICHARG=0 MAXIT=200 MULT=1\n  COORD=UNIQUE EXETYP=RUN ICUT=12 ISPHER=-1 QMTTOL=1e-8\n  UNITS=BOHR NPRINT=0 CITYP=ALDET";
+    ofs << " $END\n";
+    ofs << " $SCF";
+    ofs << " FDIFF=.F. CONV=1.0D-8 NPUNCH=0 DIIS=.T.\n  SOSCF=.F. DIRSCF=.F. DAMP=.F. NOCONV=.F. EXTRAP=.F.";
+    ofs << " $END\n";
+    ofs << " $SYSTEM";
+    ofs << " MWORDS=200 KDIAG=0";
+    ofs << " $END\n";
+    ofs << " $TRANS";
+    ofs << " CUTTRF=1.0D-14";
+    ofs << " $END\n";
+    ofs << " $GUESS";
+    ofs << " GUESS=HCORE";
+    ofs << " $END\n";
+    ofs << " $CIDET";
+    ofs << " NCORE=0 NACT=" << 2 * basis.functions_number() << " NELS=2 SZ=0 NSTATE=1 PRTTOL=0.000000000001";
+    ofs << " $END\n";
+    ofs << " $CIDRT";
+    ofs << " NFZC=0 NDOC=1 NVAL=25 IEXCIT=2";
+    ofs << " $END\n";
+    ofs << " $DATA\n";
+    ofs << " Title\n";
+    ofs << " C1\n";
 }
 
-bool GTOPW::read(std::istream &is) {
-    string line;
-    if (!getline(is, line))
-        return false;
+void Inputs_preparer::punch_gtopw_setings(ofstream &ofs) const {
+    if (!ofs.is_open())
+        throw runtime_error("GTOPW input file is not open.");
 
-    istringstream ss(line);
-    char moment = ss.get();
-    shl         = char2shell(moment);
-    ss >> size;
-    exps.empty();
-    coefs.empty();
-    exps.reserve(size);
-    coefs.reserve(size);
-
-    for (int i = 0; i < size; ++i) {
-        getline(is, line);
-        istringstream ssl(line);
-        double exp, re, im;
-        int gnum;
-        ssl >> gnum;
-        if (gnum != i + 1)
-            throw runtime_error("Invalind gtopw contraction read.");
-
-        ssl >> exp >> re >> im;
-        exps.push_back(exp);
-        coefs.push_back(cdouble(re, im));
-
-        double k0, k1, k2;
-        ssl >> k0 >> k1 >> k2;
-        if (i == 0)
-            k = {k0, k1, k2};
-        else if (k0 != k[0] || k1 != k[1] || k2 != k[2])
-            throw runtime_error("Invalind gtopw contraction read - check k.");
-    }
-
-    return true;
-}
-
-int GTOPW::functions_number() {
-    return Shell::crt_siz.at(shell2int(shl)) * size;
-}
-
-bool Basis::read(istream &is) {
-    Basis();
-    
-    string line;
-    if (!getline(is, line))
-        return false;
-
-    istringstream ss(line);
-    string token;
-    ss >> token;
-    if (token == "$END")
-        return false;
-
-    atom = token;
-    ss >> position[0] >> position[1] >> position[2];
-    GTOPW g;
-    while(g.read()) 
-        gtopws.push_back(g);
-    
-    return true;
+    ofs << "$INTS\n";
+    ofs << "4\nSTVH\nDIPOLE\nVELOCITY\nERI\n";
+    ofs << "$END\n";
+    ofs << "$POINTS\n";
+    ofs << "1\n0.000 0.000 0.000\n";
+    ofs << "$END\n";
+    ofs << "$BASIS\n";
 }
