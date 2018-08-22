@@ -85,6 +85,8 @@ class Basis {
     void set_position(const Vec3d &pos) { position = pos; };
     void set_label(const std::string &lb) { label = lb; };
     Shell get_max_shell() const;
+    void truncate_at(const Shell &shl);
+    void set_kvec(const Vec3d &kvec);
 
    private:
     std::vector<GTOPW> gtopws;

@@ -16,15 +16,16 @@
 
 class Inputs_preparer {
    public:
-    Inputs_preparer(const double &r_min, const double &r_max, const int &n_points,
-                    const int &n_kvals);
+    Inputs_preparer(const double &r_min = 0.8, const double &r_max = 4.0, const int &n_points = 15,
+                    const int &n_kvals = 10);
 
     void read_basis(const std::string &path);
     void punch_gamess_setings(std::ofstream &ofs) const;
     void punch_gtopw_setings(std::ofstream &ofs) const;
     void set_kval(const double &k) { kval = k; };
-
     void read_continuum(const std::string &path);
+
+    void prepare(const std::string &out_path);
 
    private:
     std::string path_tmp;

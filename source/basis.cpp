@@ -2,14 +2,13 @@
 
 #include <sstream>
 
-
 const std::map<char, int> Shell::charmap = {{'S', 0},
                                             {'P', 1},
                                             {'D', 2},
                                             {'F', 3},
                                             {'G', 4},
                                             {'H', 5},
-                                            {'J', 6}};
+                                            {'I', 6}};
 
 const std::array<int, 11> Shell::crt_siz = {1, 3, 6, 10, 15, 21, 28, 36, 45, 55};
 const std::array<int, 11> Shell::labels  = {'S', 'P', 'D', 'F', 'G', 'H', 'I'};
@@ -161,4 +160,28 @@ int Basis::functions_number() const {
         num += x.functions_number();
 
     return num;
+}
+
+Shell Basis::get_max_shell() const {
+    int max = 0;
+    for (auto it = gtopws.begin(); it != gtopws.end(); it++) {
+        auto shl = shell2int(it->get_shell());
+        if (shl > max)
+            max = shl;
+    }
+    return Shell(max);
+}
+
+void Basis::truncate_at(const Shell &shl) {
+    for (auto it = gtopws.begin(); it != gtopws.end();) {
+        if (shell2int(it->get_shell()) > shell2int(shl))
+            gtopws.erase(it);
+        else
+            it++;
+    }
+}
+
+void Basis::set_kvec(const Vec3d &kvec) {
+    for (auto &x : gtopws)
+        x.set_kvec(kvec);
 }
