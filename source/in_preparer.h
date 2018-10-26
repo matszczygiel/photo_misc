@@ -20,17 +20,15 @@ class Inputs_preparer {
                     const int &n_kvals = 10);
 
     void read_basis(const std::string &path);
-    void punch_gamess_setings(std::ofstream &ofs) const;
+    void punch_gamess_setings_neutral(std::ofstream &ofs) const;
+    void punch_gamess_setings_ionized(std::ofstream &ofs) const;
     void punch_gtopw_setings(std::ofstream &ofs) const;
     void set_kval(const double &k) { kval = k; };
     void read_continuum(const std::string &path);
 
-    void prepare(const std::string &out_path);
+    void prepare(const std::string &out_path, const Shell& cont_max_l);
 
    private:
-    std::string path_tmp;
-    std::string path_cfits;
-
     Basis basis;
     Basis cont;
     std::vector<double> rvals;

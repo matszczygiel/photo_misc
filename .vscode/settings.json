@@ -58,5 +58,6 @@
         "strstream": "cpp"
         },
         "C_Cpp.clang_format_style": "file",
-        "C_Cpp.configurationWarnings": "Disabled"
+        "C_Cpp.configurationWarnings": "Disabled",
+        "python.pythonPath": "/usr/bin/python3"
     }

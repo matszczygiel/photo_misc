@@ -102,7 +102,7 @@ bool GTOPW::read(std::istream &is) {
 }
 
 int GTOPW::functions_number() const {
-    return Shell::crt_siz.at(shell2int(shl)) * size;
+    return Shell::crt_siz.at(shell2int(shl));
 }
 
 bool Basis::read(std::istream &is) {
