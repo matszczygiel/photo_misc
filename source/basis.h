@@ -1,5 +1,4 @@
-#ifndef BASIS_H
-#define BASIS_H
+#pragma once
 
 #include <array>
 #include <cassert>
@@ -12,22 +11,22 @@
 using Vec3d   = std::array<double, 3>;
 using cdouble = std::complex<double>;
 
+enum class Shells { S = 0,
+                    P = 1,
+                    D = 2,
+                    F = 3,
+                    G = 4,
+                    H = 5,
+                    I = 6,
+                    K = 7,
+                    L = 8
+};
+
 class Shell {
    public:
     static const std::array<int, 11> crt_siz;
     static const std::array<int, 11> labels;
     static const std::map<char, int> charmap;
-
-    enum Shells { S = 0,
-                  P = 1,
-                  D = 2,
-                  F = 3,
-                  G = 4,
-                  H = 5,
-                  I = 6,
-                  K = 7,
-                  L = 8
-    };
 
     friend Shell char2shell(const char &c);
     friend char shell2char(const Shell &shell);
@@ -37,6 +36,7 @@ class Shell {
     Shell(const int &shell) {
         shl = static_cast<Shells>(shell);
     }
+    Shell(const Shells &shell) : shl(shell) {}
 
    private:
     Shells shl;
@@ -47,14 +47,9 @@ class GTOPW {
     GTOPW(const std::vector<double> &exponents,
           const std::vector<cdouble> &coefficients,
           const Shell &shell,
-          const Vec3d kvec)
-        : shl(shell) {
+          const Vec3d kvec = {0, 0, 0})
+        : shl(shell), size(exponents.size()), exps(exponents), coefs(coefficients), k(kvec) {
         assert(exponents.size() == coefficients.size());
-
-        size  = exponents.size();
-        exps  = exponents;
-        coefs = coefficients;
-        k     = kvec;
     };
 
     GTOPW() : exps(), coefs(), shl(0), size(0) {
@@ -96,5 +91,3 @@ class Basis {
     double charge;
     Vec3d position;
 };
-
-#endif
