@@ -16,7 +16,7 @@
 
 class Inputs_preparer {
    public:
-    Inputs_preparer(const double &r_min = 0.8, const double &r_max = 4.0, const int &n_points = 15,
+    Inputs_preparer(const double &r_min = 0.8, const double &r_max = 4.0, const int &rind_start = 0, const int &n_points = 15,
                     const int &n_kvals = 10);
 
     void read_basis(const std::string &path);
@@ -26,7 +26,8 @@ class Inputs_preparer {
     void set_kval(const double &k) { kval = k; };
     void read_continuum(const std::string &path);
 
-    void prepare(const std::string &out_path, const Shell& cont_max_l);
+    void prepare_xgtopw(const std::string &out_path, const Shell& cont_max_l);
+    void prepare_gms(const std::string &out_path);
 
    private:
     Basis basis;
@@ -34,6 +35,7 @@ class Inputs_preparer {
     std::vector<double> rvals;
     std::vector<double> ktheta;
     double kval;
+    int r_ind_start;
 };
 
 #endif

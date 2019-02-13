@@ -4,9 +4,9 @@
 
 using namespace std;
 
-Inputs_preparer::Inputs_preparer(const double &r_min, const double &r_max, const int &n_points,
+Inputs_preparer::Inputs_preparer(const double &r_min, const double &r_max, const int &rind_start, const int &n_points,
                                  const int &n_kvals)
-    : basis(), cont(), kval(0) {
+    : basis(), cont(), kval(0), r_ind_start(rind_start) {
     if (n_points == 1)
         rvals = {r_min};
     else {
@@ -57,7 +57,7 @@ void Inputs_preparer::punch_gamess_setings_neutral(ofstream &ofs) const {
     ofs << " GUESS=HCORE";
     ofs << " $END\n";
     ofs << " $CIDET";
-    ofs << " NCORE=0 NACT=" << 2 * basis.functions_number() << " NELS=2 SZ=0 NSTATE=1 PRTTOL=0.000000000001";
+    ofs << " NCORE=0 NACT=" << (2 * basis.functions_number() < 100 ? 2 * basis.functions_number() : 100) << " NELS=2 SZ=0 NSTATE=1 PRTTOL=0.000000000001";
     ofs << " $END\n";
     ofs << " $CIDRT";
     ofs << " NFZC=0 NDOC=1 NVAL=25 IEXCIT=2";
@@ -105,7 +105,7 @@ void Inputs_preparer::punch_gtopw_setings(ofstream &ofs) const {
     ofs << "$BASIS\n";
 }
 
-void Inputs_preparer::prepare(const std::string &out_path, const Shell &cont_max_l) {
+void Inputs_preparer::prepare_xgtopw(const std::string &out_path, const Shell &cont_max_l) {
     cont.truncate_at(cont_max_l);
     cont.set_position({0., 0., 0.});
     cont.set_label("CONT");
@@ -114,14 +114,35 @@ void Inputs_preparer::prepare(const std::string &out_path, const Shell &cont_max
     stream.precision(3);
     stream << std::fixed << kval;
     std::string kstr = stream.str();
-
     for (unsigned rind = 0; rind < rvals.size(); ++rind) {
-        std::string gamess_neutral = out_path + "h2_R" + to_string(rind) + ".inp";
+        for (unsigned kind = 0; kind < ktheta.size(); ++kind) {
+            std::string gtopw_f = out_path + "/h2_k" + kstr + "_t" + to_string(kind) + "_R" + to_string(r_ind_start + rind) + ".inp";
+            std::ofstream gtopw(gtopw_f);
+            if (!gtopw.is_open())
+                throw std::runtime_error("Cannot create gtopw input file.");
+
+            punch_gtopw_setings(gtopw);
+            cont.set_kvec({kval * std::sin(ktheta[kind]), 0., kval * std::cos(ktheta[kind])});
+            basis.set_position({0, 0, 0.5 * rvals[rind]});
+            gtopw << basis;
+            basis.set_position({0, 0, -0.5 * rvals[rind]});
+            gtopw << basis;
+            gtopw << cont;
+
+            gtopw << "$END\n";
+            gtopw.close();
+        }
+    }
+}
+
+void Inputs_preparer::prepare_gms(const std::string &out_path) {
+    for (unsigned rind = 0; rind < rvals.size(); ++rind) {
+        std::string gamess_neutral = out_path + "/h2_R" + to_string(r_ind_start + rind) + ".inp";
         ofstream gamess_n(gamess_neutral);
         if (!gamess_n.is_open())
             throw std::runtime_error("Cannot create gamess_n input file.");
 
-        std::string gamess_ionized = out_path + "h2p_R" + to_string(rind) + ".inp";
+        std::string gamess_ionized = out_path + "/h2p_R" + to_string(r_ind_start + rind) + ".inp";
         ofstream gamess_i(gamess_ionized);
         if (!gamess_i.is_open())
             throw std::runtime_error("Cannot create gamess_i input file.");
@@ -140,23 +161,5 @@ void Inputs_preparer::prepare(const std::string &out_path, const Shell &cont_max
         gamess_i << "$END\n";
         gamess_n.close();
         gamess_i.close();
-
-        for (unsigned kind = 0; kind < ktheta.size(); ++kind) {
-            std::string gtopw_f = out_path + "h2_k" + kstr + "_t" + to_string(kind) + "_R" + to_string(rind) + ".inp";
-            std::ofstream gtopw(gtopw_f);
-            if (!gtopw.is_open())
-                throw std::runtime_error("Cannot create gtopw input file.");
-
-            punch_gtopw_setings(gtopw);
-            cont.set_kvec({kval * std::sin(ktheta[kind]), 0., kval * std::cos(ktheta[kind])});
-            basis.set_position({0, 0, 0.5 * rvals[rind]});
-            gtopw << basis;
-            basis.set_position({0, 0, -0.5 * rvals[rind]});
-            gtopw << basis;
-            gtopw << cont;
-
-            gtopw << "$END\n";
-            gtopw.close();
-        }
     }
 }
