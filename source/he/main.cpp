@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 
             punch_xgtopw_header(gtopw);
 
-            cont.set_kvec({0, 0., kval});
+            cont.set_kvec({kval, 0., 0});
             basis.set_position({0, 0, 0});
             gtopw << basis;
             gtopw << cont;
