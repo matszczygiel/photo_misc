@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
         std::string gamess_ionized = static_cast<std::string>(argv[3]) + "/hep.inp";
         ofstream gamess_i(gamess_ionized);
 
-        punch_gms_neutral_header(gamess_n, basis.functions_number() < 100 ? 2 * basis.functions_number() : 100);
+        punch_gms_neutral_header(gamess_n, basis.functions_number() < 100 ? basis.functions_number() : 100);
         punch_gms_ion_header(gamess_i);
 
         basis.set_position({0, 0, 0});
