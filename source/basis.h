@@ -4,6 +4,7 @@
 #include <cassert>
 #include <complex>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <string>
 #include <vector>
@@ -91,3 +92,8 @@ class Basis {
     double charge;
     Vec3d position;
 };
+
+
+void punch_xgtopw_header(std::ofstream &ofs);
+void punch_gms_ion_header(std::ofstream &ofs);
+void punch_gms_neutral_header(std::ofstream &ofs, const int& active_orbs_ci);
