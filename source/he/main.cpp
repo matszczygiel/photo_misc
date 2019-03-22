@@ -69,6 +69,7 @@ int main(int argc, char* argv[]) {
             stream << fixed << setprecision(3) << kval;
             string k_str = stream.str();
             string fit   = photo_fit_out_path + "fit_z1_k" + k_str + ".dat";
+            std::cout << k_str << "\n";
 
             file.open(fit);
             if (!file.is_open())
