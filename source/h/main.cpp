@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
         std::string gamess_neutral = static_cast<std::string>(argv[3]) + "/h.inp";
         ofstream gamess_n(gamess_neutral);
 
-        punch_gms_neutral_header(gamess_n, basis.functions_number() < 100 ? basis.functions_number() : 100);
+        punch_gms_neutral_header_one_electron(gamess_n);
 
         basis.set_position({0, 0, 0});
         gamess_n << basis;

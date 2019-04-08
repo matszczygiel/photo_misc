@@ -97,3 +97,4 @@ class Basis {
 void punch_xgtopw_header(std::ofstream &ofs);
 void punch_gms_ion_header(std::ofstream &ofs);
 void punch_gms_neutral_header(std::ofstream &ofs, const int& active_orbs_ci);
+void punch_gms_neutral_header_one_electron(std::ofstream &ofs);

@@ -226,6 +226,30 @@ void punch_gms_ion_header(std::ofstream &ofs) {
     ofs << " C1\n";
 }
 
+void punch_gms_neutral_header_one_electron(std::ofstream &ofs) {
+    if (!ofs.is_open())
+        throw std::runtime_error("Gamess input file is not open.");
+
+    ofs << " $CONTRL";
+    ofs << " SCFTYP=UHF RUNTYP=ENERGY ICHARG=0 MAXIT=200 MULT=2\n  COORD=UNIQUE EXETYP=RUN ICUT=12 ISPHER=-1 QMTTOL=1e-8\n  UNITS=BOHR NPRINT=0";
+    ofs << " $END\n";
+    ofs << " $SCF";
+    ofs << " FDIFF=.F. CONV=1.0D-8 NPUNCH=0 DIIS=.T.\n  SOSCF=.F. DIRSCF=.F. DAMP=.F. NOCONV=.F. EXTRAP=.F.";
+    ofs << " $END\n";
+    ofs << " $SYSTEM";
+    ofs << " MWORDS=200 KDIAG=0";
+    ofs << " $END\n";
+    ofs << " $TRANS";
+    ofs << " CUTTRF=1.0D-14";
+    ofs << " $END\n";
+    ofs << " $GUESS";
+    ofs << " GUESS=HCORE";
+    ofs << " $END\n";
+    ofs << " $DATA\n";
+    ofs << " Title\n";
+    ofs << " C1\n";
+}
+
 void punch_gms_neutral_header(std::ofstream &ofs, const int &active_orbs_ci) {
     if (!ofs.is_open())
         throw std::runtime_error("Gamess input file is not open.");
